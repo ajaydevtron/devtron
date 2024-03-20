@@ -1,4 +1,4 @@
-## v0.6.11
+## v0.6.11 678
 
 ## Bugs
 - fix: Nats server version upgrade (#2837)
