@@ -19,5 +19,5 @@ jobs:
     steps:
     - run: |
         echo "PR ${{ github.event.pull_request.title }} (#${{ github.event.pull_request.number }}) has been merged"
-        echo "GITHUB_REF :$ GITHUB_REF"
+        echo "GITHUB_REF:$GITHUB_REF"
         echo "GITHUB_HEAD_REF:$GITHUB_HEAD_REF"
