@@ -1,4 +1,4 @@
-## v0.6.10
+## v0.6.10 798989
 
 ## Bugs
 - fix: safe check added if cell value is not found in resource list (#2839)
