@@ -18,3 +18,4 @@ jobs:
         echo "PR ${{ github.event.pull_request.title }} (#${{ github.event.pull_request.number }}) has been merged"
         echo "The target branch name : $GITHUB_REF"
         echo "PR requested  Branch name  : $GITHUB_HEAD_REF"
+        echo "Merge commit is ${{ github.event.pull_request.head.sha }}"
