@@ -34,7 +34,7 @@ jobs:
         cd $repo_name
         git checkout -b $final_branch main
         git branch
-        if [[ git cherry-pick $commit_sha > /dev/null 2>&1 ]] 
+        if git cherry-pick $commit_sha > /dev/null 2>&1
         then
             echo "Cherry-pick succeeded"
         else
