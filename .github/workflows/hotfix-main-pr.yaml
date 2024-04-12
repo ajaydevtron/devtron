@@ -14,6 +14,7 @@ jobs:
     steps:
     - run: |
         echo "PR title is ${{ github.event.pull_request.title }}"
+        echo "PR title is ${{ github.event.pull_request.title }}"
         echo "PR number is ${{ github.event.pull_request.number }}"
         commit_sha=${{ github.event.pull_request.head.sha }}
         target_branch=$GITHUB_REF
@@ -34,6 +35,11 @@ jobs:
         git checkout -b $final_branch main
         git branch
         git cherry-pick $commit_sha
+        if [ $? -eq 0 ]; then
+          echo "Cherry-pick succeeded"
+        else
+            echo "Cherry-pick failed"
+        fi
       env:
         GH_TOKEN: ${{ github.token }}
         GIT_CONFIG_NAME: ${{ secrets.GIT_TARGET_USERNAME }}
