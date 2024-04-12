@@ -34,11 +34,21 @@ jobs:
         cd $repo_name
         git checkout -b $final_branch main
         git branch
-        if git cherry-pick $commit_sha > /dev/null 2>&1
-        then
+        # Define a temporary file to store the output of git cherry-pick
+        tmp_file=$(mktemp)
+        # Run git cherry-pick and redirect output to the temporary file
+        git cherry-pick $commit_sha > $tmp_file 2>&1
+        # Check the exit status of git cherry-pick
+        if [ $? -eq 0 ]; then
             echo "Cherry-pick succeeded"
+            # Remove the temporary file
+            rm $tmp_file
         else
             echo "Cherry-pick failed with conflicts"
+            # Print the content of the temporary file (conflict message)
+            cat $tmp_file
+            # Remove the temporary file
+            rm $tmp_file
             exit 0
         fi
       env:
