@@ -34,11 +34,12 @@ jobs:
         cd $repo_name
         git checkout -b $final_branch main
         git branch
-        git cherry-pick $commit_sha > /dev/null 2>&1
-        if [ $? -eq 0 ]; then
-          echo "Cherry-pick succeeded"
+        if git cherry-pick $commit_sha > /dev/null 2>&1; then
+            echo "Cherry-pick succeeded"
         else
-            echo "Cherry-pick failed: $cherry_output"
+            cherry_pick_error=$(git cherry-pick $commit_sha 2>&1)
+            echo "Cherry-pick failed with conflicts: $cherry_pick_error"
+            exit 0
         fi
       env:
         GH_TOKEN: ${{ github.token }}
