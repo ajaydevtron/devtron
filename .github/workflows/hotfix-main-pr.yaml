@@ -25,3 +25,16 @@ jobs:
         trim_sha="${commit_sha:0:7}"
         echo "The target branch name: $target_branch and hotfix_tag is $hotfix_tag"
         echo "Merge commit is $trim_sha"
+        final_branch="$hotfix_tag-$trim_sha"
+        echo "repo url is $GITHUB_REPOSITORY"
+        gh repo clone $GITHUB_REPOSITORY
+        repo_name=$(echo $GITHUB_REPOSITORY | awk -F ["/"] '{print $2}')
+        git config --global user.email "${GIT_CONFIG_EMAIL}" && git config --global user.name "${GIT_CONFIG_NAME}"
+        cd $repo_name
+        ls
+        git checkout -b final_branch main
+        git cherry-pick $commit_sha
+      env:
+        GH_TOKEN: ${{ secrets.GIT_TOKEN }}
+        GIT_CONFIG_NAME: ${{ secrets.GIT_TARGET_USERNAME }}
+        GIT_CONFIG_EMAIL: ${{ secrets.GIT_TARGET_EMAIL }}
