@@ -1,5 +1,4 @@
 name: hotfix-main-PR
-
 # Controls when the workflow will run
 on:
   pull_request_target:
@@ -7,7 +6,6 @@ on:
       - closed
     branches:
       - 'hotfix-**'
-
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
   if_merged:
@@ -15,7 +13,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - run: |
-        echo "PR ${{ github.event.pull_request.title }} (#${{ github.event.pull_request.number }}) has been merged"
-        echo "The target branch name : $GITHUB_REF"
-        echo "PR requested  Branch name  : $GITHUB_HEAD_REF"
-        echo "Merge commit is ${{ github.event.pull_request.head.sha }}"
+        // echo "PR ${{ github.event.pull_request.title }} (#${{ github.event.pull_request.number }}) has been merged"
+        echo "PR title is ${{ github.event.pull_request.title"
+        echo "PR number is ${{ github.event.pull_request.title"
+        commit_sha = "${{ github.event.pull_request.head.sha }}"
+        target_branch="$GITHUB_REF"
+        requested_branch="$GITHUB_HEAD_REF"
+        echo "The target branch name : $target_branch"
+        echo "Merge commit is ${{ commit_sha }}"
+        echo "PR requested  Branch name  : $requested_branch"
+        echo "The author of this PR is: ${{ github.event.pull_request.user.login }}"
