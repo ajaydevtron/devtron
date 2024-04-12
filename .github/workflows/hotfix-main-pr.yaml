@@ -34,11 +34,11 @@ jobs:
         cd $repo_name
         git checkout -b $final_branch main
         git branch
-        if git cherry-pick $commit_sha > /dev/null 2>&1; then
+        if [[ git cherry-pick $commit_sha > /dev/null 2>&1 ]] 
+        then
             echo "Cherry-pick succeeded"
         else
-            cherry_pick_error=$(git cherry-pick $commit_sha 2>&1)
-            echo "Cherry-pick failed with conflicts: $cherry_pick_error"
+            echo "Cherry-pick failed with conflicts"
             exit 0
         fi
       env:
