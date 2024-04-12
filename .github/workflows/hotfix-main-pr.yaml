@@ -35,6 +35,6 @@ jobs:
         git checkout -b final_branch main
         git cherry-pick $commit_sha
       env:
-        GH_TOKEN: ${{ secrets.GIT_TOKEN }}
+        GH_TOKEN: ${{ github.token }}
         GIT_CONFIG_NAME: ${{ secrets.GIT_TARGET_USERNAME }}
         GIT_CONFIG_EMAIL: ${{ secrets.GIT_TARGET_EMAIL }}
