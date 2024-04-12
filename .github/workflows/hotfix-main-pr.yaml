@@ -15,11 +15,13 @@ jobs:
     - run: |
         echo "PR title is ${{ github.event.pull_request.title }}"
         echo "PR number is ${{ github.event.pull_request.number }}"
-        x=5
         commit_sha=${{ github.event.pull_request.head.sha }}
         target_branch=$GITHUB_REF
         requested_branch=$GITHUB_HEAD_REF
-        echo "The target branch name: $target_branch"
-        echo "Merge commit is $commit_sha"
         echo "PR requested  Branch name  : $requested_branch"
         echo "The author of this PR is: ${{ github.event.pull_request.user.login }}"
+        target_branch=$(basename "$target_branch")
+        hotfix_tag=$(echo "$target_branch" | cut -d '-' -f 2)
+        trim_sha="${commit_sha:0:7}"
+        echo "The target branch name: $target_branch and hotfix_tag is $hotfix_tag"
+        echo "Merge commit is $trim_sha"
