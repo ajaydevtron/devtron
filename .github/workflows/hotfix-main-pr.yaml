@@ -31,8 +31,8 @@ jobs:
         repo_name=$(echo $GITHUB_REPOSITORY | awk -F ["/"] '{print $2}')
         git config --global user.email "${GIT_CONFIG_EMAIL}" && git config --global user.name "${GIT_CONFIG_NAME}"
         cd $repo_name
-        ls
-        git checkout -b final_branch main
+        git checkout -b $final_branch main
+        git branch
         git cherry-pick $commit_sha
       env:
         GH_TOKEN: ${{ github.token }}
