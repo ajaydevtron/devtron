@@ -14,14 +14,10 @@ jobs:
     steps:
     - run: |
         echo "PR title is ${{ github.event.pull_request.title }}"
-        echo "PR title is ${{ github.event.pull_request.title }}"
-        echo "PR number is ${{ github.event.pull_request.number }}"
         commit_sha=${{ github.event.pull_request.head.sha }}
         target_branch=$GITHUB_REF
         requested_branch=$GITHUB_HEAD_REF
         echo "PR requested  Branch name  : $requested_branch"
-        pr_title=${{ github.event.pull_request.title }}
-        pr_pody=${{ github.event.pull_request.body }}
         author=${{ github.event.pull_request.user.login }}
         target_branch=$(basename "$target_branch")
         hotfix_tag=$(echo "$target_branch" | cut -d '-' -f 2)
@@ -57,8 +53,8 @@ jobs:
             --header "Authorization: Bearer $GH_TOKEN" \
             --header "Content-Type: application/json" \
             --data "{
-              \"title\": \"$pr_title\",
-              \"body\": \"$pr_body\",
+              \"title\": \"$PR_TITLE\",
+              \"body\": \"$PR_BODY\",
               \"head\": \"$final_branch\",
               \"base\": \"$base_branch\"
             }"
@@ -68,6 +64,8 @@ jobs:
             exit 0
         fi
       env:
+        PR_BODY: ${{ github.event.pull_request.body }}
+        PR_TITLE: ${{ github.event.pull_request.title }}
         DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         GH_TOKEN: ${{ github.token }}
         GIT_CONFIG_NAME: ${{ secrets.GIT_TARGET_USERNAME }}
