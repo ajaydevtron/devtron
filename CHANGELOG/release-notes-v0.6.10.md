@@ -7,7 +7,7 @@ PK2
 PK3
 Pk67
 PK4
-Pk6
+Pk9
 ## Bugs
 - fix: safe check added if cell value is not found in resource list (#2839)
 ## Enhancements
