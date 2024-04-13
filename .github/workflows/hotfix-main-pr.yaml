@@ -13,12 +13,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - run: |
-        pr_title=${{ github.event.pull_request.title }}
-        # pr_pody=${{ github.event.pull_request.body }}
+        echo "PR title is ${{ github.event.pull_request.title }}"
+        echo "PR title is ${{ github.event.pull_request.title }}"
+        echo "PR number is ${{ github.event.pull_request.number }}"
         commit_sha=${{ github.event.pull_request.head.sha }}
         target_branch=$GITHUB_REF
         requested_branch=$GITHUB_HEAD_REF
         echo "PR requested  Branch name  : $requested_branch"
+        pr_title=${{ github.event.pull_request.title }}
+        pr_pody=${{ github.event.pull_request.body }}
         author=${{ github.event.pull_request.user.login }}
         target_branch=$(basename "$target_branch")
         hotfix_tag=$(echo "$target_branch" | cut -d '-' -f 2)
@@ -33,6 +36,7 @@ jobs:
         cd $repo_name
         git checkout -b $final_branch main
         git branch
+        base_branch="main"
         # Check the exit status of git cherry-pick
         send_discord_message() {
           # Prepare message data
@@ -44,7 +48,6 @@ jobs:
           # Send message using curl
           curl -X POST -H "Content-Type: application/json" -d "$json_payload" "${DISCORD_WEBHOOK_URL}"
         }
-        base_branch=main
         if git cherry-pick $commit_sha > /dev/null 2>&1
         then
             echo "************* Cherry-pick succeeded ***********"
@@ -59,9 +62,8 @@ jobs:
               \"head\": \"$final_branch\",
               \"base\": \"$base_branch\"
             }"
-            
         else
-            echo "**************** Cherry-pick failed with conflicts *****************"
+            echo "Cherry-pick failed with conflicts"
             send_discord_message
             exit 0
         fi
