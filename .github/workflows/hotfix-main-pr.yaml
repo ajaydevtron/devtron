@@ -43,7 +43,7 @@ jobs:
           discord_data+="Git Branch:    $requested_branch\n"
           json_payload="{\"content\": \"\`\`\`\n$discord_data\n\`\`\`\"}"
           # Send message using curl
-          curl -X POST -H "Content-Type: application/json" -d "$json_payload" "$discord_webhook"
+          curl -X POST -H "Content-Type: application/json" -d "$json_payload" "${DISCORD_WEBHOOK_URL}"
         }
         if git cherry-pick $commit_sha > /dev/null 2>&1
         then
@@ -54,6 +54,7 @@ jobs:
             exit 0
         fi
       env:
+        DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
         GH_TOKEN: ${{ github.token }}
         GIT_CONFIG_NAME: ${{ secrets.GIT_TARGET_USERNAME }}
         GIT_CONFIG_EMAIL: ${{ secrets.GIT_TARGET_EMAIL }}
