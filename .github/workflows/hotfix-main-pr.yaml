@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - run: |
+        set -v 
         pr_title=${{ github.event.pull_request.title }}
         pr_pody=${{ github.event.pull_request.body }}
         commit_sha=${{ github.event.pull_request.head.sha }}
