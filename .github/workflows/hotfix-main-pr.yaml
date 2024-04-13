@@ -34,10 +34,6 @@ jobs:
         cd $repo_name
         git checkout -b $final_branch main
         git branch
-        # Define a temporary file to store the output of git cherry-pick
-        tmp_file=$(mktemp)
-        # Run git cherry-pick and redirect output to the temporary file
-        git cherry-pick $commit_sha > $tmp_file 2>&1
         # Check the exit status of git cherry-pick
         if git cherry-pick $commit_sha > /dev/null 2>&1
         then
