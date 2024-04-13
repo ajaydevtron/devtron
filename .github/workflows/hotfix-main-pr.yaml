@@ -13,9 +13,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - run: |
-        echo "PR title is ${{ github.event.pull_request.title }}"
-        echo "PR title is ${{ github.event.pull_request.title }}"
-        echo "PR number is ${{ github.event.pull_request.number }}"
+        pr_title=${{ github.event.pull_request.title }}
+        pr_pody=${{ github.event.pull_request.body }}
         commit_sha=${{ github.event.pull_request.head.sha }}
         target_branch=$GITHUB_REF
         requested_branch=$GITHUB_HEAD_REF
@@ -45,11 +44,24 @@ jobs:
           # Send message using curl
           curl -X POST -H "Content-Type: application/json" -d "$json_payload" "${DISCORD_WEBHOOK_URL}"
         }
+        base_branch=main
         if git cherry-pick $commit_sha > /dev/null 2>&1
         then
-            echo "Cherry-pick succeeded"
+            echo "************* Cherry-pick succeeded ***********"
+            git push origin $final_branch
+            curl --request POST \
+            --url https://api.github.com/repos/ajaydevtron/devtron/pulls \
+            --header "Authorization: Bearer $GH_TOKEN" \
+            --header "Content-Type: application/json" \
+            --data "{
+              \"title\": \"$pr_title\",
+              \"body\": \"$pr_body\",
+              \"head\": \"$final_branch\",
+              \"base\": \"$base_branch\"
+            }"
+            
         else
-            echo "Cherry-pick failed with conflicts"
+            echo "**************** Cherry-pick failed with conflicts *****************"
             send_discord_message
             exit 0
         fi
