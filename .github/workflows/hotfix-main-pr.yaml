@@ -20,7 +20,7 @@ jobs:
         target_branch=$GITHUB_REF
         requested_branch=$GITHUB_HEAD_REF
         echo "PR requested  Branch name  : $requested_branch"
-        echo "The author of this PR is: ${{ github.event.pull_request.user.login }}"
+        author=${{ github.event.pull_request.user.login }}
         target_branch=$(basename "$target_branch")
         hotfix_tag=$(echo "$target_branch" | cut -d '-' -f 2)
         trim_sha="${commit_sha:0:7}"
@@ -35,11 +35,22 @@ jobs:
         git checkout -b $final_branch main
         git branch
         # Check the exit status of git cherry-pick
+        send_discord_message() {
+          # Prepare message data
+          discord_data+="GitHub Cherry-Pick: $author\n"
+          discord_data+="-------------   -------\n"
+          discord_data+="Git Hash:      $commit_sha\n"
+          discord_data+="Git Branch:    $requested_branch\n"
+          json_payload="{\"content\": \"\`\`\`\n$discord_data\n\`\`\`\"}"
+          # Send message using curl
+          curl -X POST -H "Content-Type: application/json" -d "$json_payload" "$discord_webhook"
+        }
         if git cherry-pick $commit_sha > /dev/null 2>&1
         then
             echo "Cherry-pick succeeded"
         else
             echo "Cherry-pick failed with conflicts"
+            send_discord_message
             exit 0
         fi
       env:
