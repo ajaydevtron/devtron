@@ -13,13 +13,56 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - run: |
-        // echo "PR ${{ github.event.pull_request.title }} (#${{ github.event.pull_request.number }}) has been merged"
         echo "PR title is ${{ github.event.pull_request.title }}"
-        echo "PR number is ${{ github.event.pull_request.number }}"
-        commit_sha = "${{ github.event.pull_request.head.sha }}"
-        target_branch="$GITHUB_REF"
-        requested_branch="$GITHUB_HEAD_REF"
-        echo "The target branch name : $target_branch"
-        echo "Merge commit is $commit_sha"
-        echo "PR requested  Branch name  : $requested_branch"
-        echo "The author of this PR is: ${{ github.event.pull_request.user.login }}"
+        commit_sha=${{ github.event.pull_request.head.sha }}
+        target_branch=$GITHUB_REF
+        requested_branch=$GITHUB_HEAD_REF
+        author=${{ github.event.pull_request.user.login }}
+        target_branch=$(basename "$target_branch")
+        hotfix_tag=$(echo "$target_branch" | cut -d '-' -f 2)
+        trim_sha="${commit_sha:0:7}"
+        echo "The target branch name: $target_branch and hotfix_tag is $hotfix_tag"
+        final_branch="$hotfix_tag-$trim_sha"
+        gh repo clone $GITHUB_REPOSITORY
+        repo_name=$(echo $GITHUB_REPOSITORY | awk -F ["/"] '{print $2}')
+        git config --global user.email "${GIT_CONFIG_EMAIL}" && git config --global user.name "${GIT_CONFIG_NAME}"
+        cd $repo_name
+        git checkout -b $final_branch main
+        base_branch="main"
+        # Check the exit status of git cherry-pick
+        send_discord_message() {
+          # Prepare message data
+          discord_data+="GitHub Cherry-Pick: $author\n"
+          discord_data+="-------------   -------\n"
+          discord_data+="Git Hash:      $commit_sha\n"
+          discord_data+="Git Branch:    $requested_branch\n"
+          json_payload="{\"content\": \"\`\`\`\n$discord_data\n\`\`\`\"}"
+          # Send message using curl
+          curl -X POST -H "Content-Type: application/json" -d "$json_payload" "${DISCORD_WEBHOOK_URL}"
+        }
+        if git cherry-pick $commit_sha > /dev/null 2>&1
+        then
+            echo "************* Cherry-pick succeeded ***********"
+            git push origin $final_branch
+            curl --request POST \
+            --url https://api.github.com/repos/$GITHUB_REPOSITORY/pulls \
+            --header "Authorization: Bearer $GH_TOKEN" \
+            --header "Content-Type: application/json" \
+            --data "{
+              \"title\": \"$PR_TITLE\",
+              \"body\": \"$PR_BODY\",
+              \"head\": \"$final_branch\",
+              \"base\": \"$base_branch\"
+            }"
+        else
+            echo "Cherry-pick failed with conflicts"
+            send_discord_message
+            exit 0
+        fi
+      env:
+        PR_BODY: ${{ github.event.pull_request.body }}
+        PR_TITLE: ${{ github.event.pull_request.title }}
+        DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        GH_TOKEN: ${{ github.token }}
+        GIT_CONFIG_NAME: ${{ secrets.GIT_TARGET_USERNAME }}
+        GIT_CONFIG_EMAIL: ${{ secrets.GIT_TARGET_EMAIL }}
