@@ -28,7 +28,7 @@ jobs:
         git config --global user.email "${GIT_CONFIG_EMAIL}" && git config --global user.name "${GIT_CONFIG_NAME}"
         cd $repo_name
         base_branch="main"
-        echo "target branch: $target_branch \n requested branch: $requested_branch \n final branch: $final_branch \n"
+        echo "target branch: $target_branch \n requested branch: $requested_branch \n final branch: $final_branch Commit sha : $commit_sha"
         echo "ls and git log"
         ls
         git log -n 3
@@ -46,25 +46,24 @@ jobs:
           curl -X POST -H "Content-Type: application/json" -d "$json_payload" "${DISCORD_WEBHOOK_URL}"
         }
         # Check the exit status of git cherry-pick
-        if git cherry-pick $commit_sha > /dev/null 2>&1
-        then
-            echo "************* Cherry-pick succeeded ***********"
-            git push origin $final_branch
-            curl --request POST \
-            --url https://api.github.com/repos/$GITHUB_REPOSITORY/pulls \
-            --header "Authorization: Bearer $GH_TOKEN" \
-            --header "Content-Type: application/json" \
-            --data "{
-              \"title\": \"$PR_TITLE\",
-              \"body\": \"$PR_BODY\",
-              \"head\": \"$final_branch\",
-              \"base\": \"$base_branch\"
-            }"
-        else
-            echo "Cherry-pick failed with conflicts"
-            send_discord_message
-            exit 0
-        fi
+        git cherry-pick $commit_sha
+        echo "************* Cherry-pick succeeded ***********"
+        git push origin $final_branch
+        curl --request POST \
+        --url https://api.github.com/repos/$GITHUB_REPOSITORY/pulls \
+        --header "Authorization: Bearer $GH_TOKEN" \
+        --header "Content-Type: application/json" \
+        --data "{
+          \"title\": \"$PR_TITLE\",
+          \"body\": \"$PR_BODY\",
+          \"head\": \"$final_branch\",
+          \"base\": \"$base_branch\"
+        }"
+
+            # echo "Cherry-pick failed with conflicts"
+            # send_discord_message
+            # exit 0
+   
       env:
         PR_BODY: ${{ github.event.pull_request.body }}
         PR_TITLE: ${{ github.event.pull_request.title }}
