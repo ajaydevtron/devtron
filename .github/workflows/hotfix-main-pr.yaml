@@ -27,9 +27,14 @@ jobs:
         repo_name=$(echo $GITHUB_REPOSITORY | awk -F ["/"] '{print $2}')
         git config --global user.email "${GIT_CONFIG_EMAIL}" && git config --global user.name "${GIT_CONFIG_NAME}"
         cd $repo_name
-        git checkout -b $final_branch main
         base_branch="main"
-        # Check the exit status of git cherry-pick
+        echo "target branch: $target_branch \n requested branch: $requested_branch \n final branch: $final_branch \n"
+        echo "ls and git log"
+        ls
+        git log -n 3
+        git checkout -b $final_branch $base_branch
+        echo "checkout to $final_branch branch"
+        git log -n 3 
         send_discord_message() {
           # Prepare message data
           discord_data+="GitHub Cherry-Pick: $author\n"
@@ -40,6 +45,7 @@ jobs:
           # Send message using curl
           curl -X POST -H "Content-Type: application/json" -d "$json_payload" "${DISCORD_WEBHOOK_URL}"
         }
+        # Check the exit status of git cherry-pick
         if git cherry-pick $commit_sha > /dev/null 2>&1
         then
             echo "************* Cherry-pick succeeded ***********"
