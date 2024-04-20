@@ -35,11 +35,11 @@ jobs:
         # Func to send the notification on Discord
         send_discord_message() {
           # Prepare message data
-          discord_data+="Hotfix patch cherry-Pick failed for $repo_name Repo\n"
-          discord_data+="-------------   -------\n"
-          discord_data+="Git Hash to Cherry Pick :      $commit_sha\n"
-          discord_data+="Branch from which Cherry-pick taken :    $requested_branch\n"
-          discord_data+="Target branch where cherry-pick going to happen :    $final_branch\n"
+          discord_data+="Hotfix patch cherry-pick failed for $repo_name repo\n"
+          discord_data+="---------------------------------------------------\n"
+          discord_data+="Git hash to cherry-pick: $commit_sha\n"
+          discord_data+="Branch from which cherry-pick was taken: $requested_branch\n"
+          discord_data+="Target branch where cherry-pick was intended: $final_branch\n"
           json_payload="{\"content\": \"\`\`\`\n$discord_data\n\`\`\`\"}"
           # Send message using curl
           curl -X POST -H "Content-Type: application/json" -d "$json_payload" "${DISCORD_WEBHOOK_URL}"
@@ -52,6 +52,7 @@ jobs:
             echo "************* Cherry-pick succeeded ***********"
             echo "******** Pushing the $final_branch to origin ****"
             git push https://${GIT_CONFIG_NAME}:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY} $final_branch
+            echo "********* Creating the PR ***********"
             curl --request POST \
             --url https://api.github.com/repos/$GITHUB_REPOSITORY/pulls \
             --header "Authorization: Bearer $GH_TOKEN" \
