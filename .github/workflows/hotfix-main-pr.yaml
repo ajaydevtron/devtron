@@ -43,10 +43,13 @@ jobs:
         # Check the exit status of git cherry-pick
         echo "*********************************"
         echo "PR title: $PR_TITLE"
+        echo "PR body: PR_BODY"
         echo "*********************************"
         git cherry-pick $commit_sha
         echo "************* Cherry-pick succeeded ***********"
+        echo "*********** pushing the branch ************"
         git push https://${GIT_CONFIG_NAME}:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY} $final_branch
+        echo "************ Creating PR using curl **************"
         curl --request POST \
         --url https://api.github.com/repos/$GITHUB_REPOSITORY/pulls \
         --header "Authorization: Bearer $GH_TOKEN" \
@@ -57,10 +60,6 @@ jobs:
           \"head\": \"$final_branch\",
           \"base\": \"$base_branch\"
         }"
-
-            # echo "Cherry-pick failed with conflicts"
-            # send_discord_message
-            # exit 0
       env:
         PR_BODY: ${{ github.event.pull_request.body }}
         PR_TITLE: ${{ github.event.pull_request.title }}
