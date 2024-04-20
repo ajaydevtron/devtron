@@ -43,7 +43,7 @@ jobs:
         # Check the exit status of git cherry-pick
         echo "*********************************"
         echo "PR title: $PR_TITLE"
-        echo "PR body: PR_BODY"
+        echo "PR body: $PR_BODY"
         echo "*********************************"
         git cherry-pick $commit_sha
         echo "************* Cherry-pick succeeded ***********"
