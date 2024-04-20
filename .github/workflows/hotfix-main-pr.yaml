@@ -46,7 +46,7 @@ jobs:
         echo "*********************************"
         git cherry-pick $commit_sha
         echo "************* Cherry-pick succeeded ***********"
-        git push origin $final_branch
+        git push https://${GIT_CONFIG_NAME}:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY} origin $final_branch
         curl --request POST \
         --url https://api.github.com/repos/$GITHUB_REPOSITORY/pulls \
         --header "Authorization: Bearer $GH_TOKEN" \
