@@ -21,20 +21,15 @@ jobs:
         target_branch=$(basename "$target_branch")
         hotfix_tag=$(echo "$target_branch" | cut -d '-' -f 2)
         trim_sha="${commit_sha:0:7}"
-        echo "The target branch name: $target_branch and hotfix_tag is $hotfix_tag"
         final_branch="$hotfix_tag-$trim_sha"
         gh repo clone $GITHUB_REPOSITORY
         repo_name=$(echo $GITHUB_REPOSITORY | awk -F ["/"] '{print $2}')
-        git config --global user.email "${GIT_CONFIG_EMAIL}" && git config --global user.name "${GIT_CONFIG_NAME}"
         cd $repo_name
         base_branch="main"
-        echo "target branch: $target_branch \n requested branch: $requested_branch \n final branch: $final_branch Commit sha : $commit_sha"
-        echo "ls and git log"
-        ls
-        git log -n 3
+        echo "target branch: $target_branch ,requested branch: $requested_branch , final branch: $final_branch , Commit sha : $commit_sha, user-email: ${GIT_CONFIG_EMAIL} and user-name: ${GIT_CONFIG_NAME}"
+        git config --global user.email ${GIT_CONFIG_EMAIL} && git config --global user.name ${GIT_CONFIG_NAME}
         git checkout -b $final_branch $base_branch
         echo "checkout to $final_branch branch"
-        git log -n 3 
         send_discord_message() {
           # Prepare message data
           discord_data+="GitHub Cherry-Pick: $author\n"
@@ -46,6 +41,9 @@ jobs:
           curl -X POST -H "Content-Type: application/json" -d "$json_payload" "${DISCORD_WEBHOOK_URL}"
         }
         # Check the exit status of git cherry-pick
+        echo "*********************************"
+        echo "PR body : $PR_BODY, PR body: $PR_TITLE"
+        echo "*********************************"
         git cherry-pick $commit_sha
         echo "************* Cherry-pick succeeded ***********"
         git push origin $final_branch
@@ -63,7 +61,6 @@ jobs:
             # echo "Cherry-pick failed with conflicts"
             # send_discord_message
             # exit 0
-   
       env:
         PR_BODY: ${{ github.event.pull_request.body }}
         PR_TITLE: ${{ github.event.pull_request.title }}
