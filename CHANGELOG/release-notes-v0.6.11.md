@@ -25,7 +25,7 @@
 - task: updated deployment status timeline api for helm based pipelines (#2897)
 - task: updated logic for adding health status timeline (#2870)
 
-
+# terminal fix 23
 ## v0.6.11-rc.0
 
 ## Bugs
