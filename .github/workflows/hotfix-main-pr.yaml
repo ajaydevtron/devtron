@@ -22,7 +22,7 @@ jobs:
         hotfix_tag=$(echo "$target_branch" | cut -d '-' -f 2)
         trim_sha="${commit_sha:0:7}"
         final_branch="$hotfix_tag-$trim_sha"
-        gh repo clone $GITHUB_REPOSITORY
+        git clone https://${GIT_CONFIG_NAME}:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}
         repo_name=$(echo $GITHUB_REPOSITORY | awk -F ["/"] '{print $2}')
         cd $repo_name
         base_branch="main"
@@ -37,6 +37,7 @@ jobs:
           # Prepare message data
           discord_data+="Hotfix patch cherry-pick failed for $repo_name repo\n"
           discord_data+="---------------------------------------------------\n"
+          discord_data+="Auther name: $author\n"
           discord_data+="Git hash to cherry-pick: $commit_sha\n"
           discord_data+="Branch from which cherry-pick was taken: $requested_branch\n"
           discord_data+="Target branch where cherry-pick was intended: $final_branch\n"
