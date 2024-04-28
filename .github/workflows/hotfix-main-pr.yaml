@@ -80,6 +80,6 @@ jobs:
       env:
         PR_TITLE: ${{ github.event.pull_request.title }}
         DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_AUTOMATIC_CHERRYPICK_WEBHOOK }}
-        GH_TOKEN: ${{ github.GH_SYSTEMSDT_TOKEN }}
+        GH_TOKEN: ${{ secrets.GH_SYSTEMSDT_TOKEN }}
         GIT_CONFIG_NAME: ${{ secrets.GH_SYSTEMSDT_USERNAME }}
         GIT_CONFIG_EMAIL: ${{ secrets.GH_SYSTEMSDT_EMAIL }}
