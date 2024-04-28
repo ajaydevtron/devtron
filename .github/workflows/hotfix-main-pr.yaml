@@ -37,7 +37,7 @@ jobs:
           # Prepare message data
           discord_data+="Hotfix patch cherry-pick failed for $repo_name repo\n"
           discord_data+="---------------------------------------------------\n"
-          discord_data+="Auther name: $author\n"
+          discord_data+="Author name: $author\n"
           discord_data+="Git hash to cherry-pick: $commit_sha\n"
           discord_data+="Branch from which cherry-pick was taken: $requested_branch\n"
           discord_data+="Target branch where cherry-pick was intended: $final_branch\n"
@@ -51,27 +51,35 @@ jobs:
         if git cherry-pick $commit_sha > /dev/null 2>&1
         then
             echo "************* Cherry-pick succeeded ***********"
-            echo "******** Pushing the $final_branch to origin ****"
+            echo "\n******** Pushing the $final_branch to origin ****\n"
             git push https://${GIT_CONFIG_NAME}:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY} $final_branch
-            echo "********* Creating the PR ***********"
+            echo "\n\n********* Creating the PR ***********\n\n"
             curl --request POST \
             --url https://api.github.com/repos/$GITHUB_REPOSITORY/pulls \
             --header "Authorization: Bearer $GH_TOKEN" \
             --header "Content-Type: application/json" \
             --data "{
-              \"title\": \"$PR_TITLE\",
-              \"head\": \"$final_branch\",
-              \"base\": \"$base_branch\"
-            }"
+                \"title\": \"$PR_TITLE\",
+                \"body\": \"This pull request was generated as a result of cherry-picking commit hash $commit_sha from the $requested_branch branch into $base_branch branch\",
+                \"head\": \"$final_branch\",
+                \"base\": \"$base_branch\"
+            }" | \
+            jq '.number' | \
+            xargs -I {} curl -X POST \
+                -H "Authorization: Bearer $GH_TOKEN" \
+                -H "Content-Type: application/json" \
+                -d '{
+                "labels": ["PR:Auto-Cherrypick-from-hotfix"]
+                }' \
+                "https://api.github.com/repos/$GITHUB_REPOSITORY/issues/{}/labels"
         else
             echo "************** Cherry-pick failed with conflicts *************"
             send_discord_message
             exit 0
         fi
       env:
-        PR_BODY: ${{ github.event.pull_request.body }}
         PR_TITLE: ${{ github.event.pull_request.title }}
-        DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
-        GH_TOKEN: ${{ github.token }}
-        GIT_CONFIG_NAME: ${{ secrets.GIT_TARGET_USERNAME }}
-        GIT_CONFIG_EMAIL: ${{ secrets.GIT_TARGET_EMAIL }}
+        DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_AUTOMATIC_CHERRYPICK_WEBHOOK }}
+        GH_TOKEN: ${{ github.GH_SYSTEMSDT_TOKEN }}
+        GIT_CONFIG_NAME: ${{ secrets.GH_SYSTEMSDT_USERNAME }}
+        GIT_CONFIG_EMAIL: ${{ secrets.GH_SYSTEMSDT_EMAIL }}
